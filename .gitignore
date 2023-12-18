@@ -10,3 +10,4 @@ AdvertiseGen/
 *.idea
 
 chat.ipynb
+.DS_Store
