@@ -1,0 +1,10 @@
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://115.25.41.248:8501
+  External URL: http://115.25.41.248:8501
+
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:01<00:11,  1.98s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:04<00:11,  2.23s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:06<00:09,  2.28s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:08<00:06,  2.17s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:10<00:04,  2.14s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:12<00:02,  2.15s/it]Loading checkpoint shards: 100%|██████████| 7/7 [00:14<00:00,  1.84s/it]Loading checkpoint shards: 100%|██████████| 7/7 [00:14<00:00,  2.03s/it]

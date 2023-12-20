@@ -13,7 +13,7 @@ from conversation import Conversation
 
 TOOL_PROMPT = 'Answer the following questions as best as you can. You have access to the following tools:'
 
-MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+MODEL_PATH = os.environ.get('MODEL_PATH', '/home/lc/projects/pretrained_models/chatglm3-6b')
 PT_PATH = os.environ.get('PT_PATH', None)
 PRE_SEQ_LEN = int(os.environ.get("PRE_SEQ_LEN", 128))  # mark sure your have pt_path with finetune model
 
