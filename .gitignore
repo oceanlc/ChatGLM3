@@ -12,3 +12,4 @@ AdvertiseGen/
 chat.ipynb
 composite_demo/registry_mytool.py
 .DS_Store
+*.log

@@ -18,9 +18,9 @@ You are ChatGLM3, a large language model trained by Zhipu.AI. Follow the user's 
 st.title("ChatGLM3 Demo")
 
 # Add your custom text here, with smaller font size
-st.markdown(
-    "<sub>智谱AI 公开在线技术文档: https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof </sub> \n\n <sub> 更多 ChatGLM3-6B 的使用方法请参考文档。</sub>",
-    unsafe_allow_html=True)
+# st.markdown(
+#     "<sub>智谱AI 公开在线技术文档: https://lslfd0slxc.feishu.cn/wiki/WvQbwIJ9tiPAxGk8ywDck6yfnof </sub> \n\n <sub> 更多 ChatGLM3-6B 的使用方法请参考文档。</sub>",
+#     unsafe_allow_html=True)
 
 
 class Mode(str, Enum):
@@ -38,7 +38,7 @@ with st.sidebar:
         'repetition_penalty', 0.0, 2.0, 1.1, step=0.01
     )
     max_new_token = st.slider(
-        'Output length', 5, 32000, 256, step=1
+        'Output length', 5, 32000, 4000, step=1
     )
 
     cols = st.columns(2)
