@@ -1,1 +1,0 @@
-CUDA_VISIBLE_DEVICES=0 nohup streamlit run main.py >>streamlit.log 2>&1 &

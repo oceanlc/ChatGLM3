@@ -7,7 +7,8 @@ from streamlit.delta_generator import DeltaGenerator
 
 from client import get_client
 from conversation import postprocess_text, preprocess_text, Conversation, Role
-from tool_registry import dispatch_tool, get_tools
+# from tool_registry import dispatch_tool, get_tools
+from registry_mytool import dispatch_tool, get_tools
 
 EXAMPLE_TOOL = {
     "name": "get_current_weather",
