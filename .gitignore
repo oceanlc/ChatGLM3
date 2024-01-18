@@ -14,3 +14,4 @@ composite_demo/registry_mytool.py
 .DS_Store
 *.log
 composite_demo/run_streamlit.sh
+openai_api_demo/run_api_server.sh

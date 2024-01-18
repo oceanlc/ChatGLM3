@@ -48,11 +48,11 @@ from sse_starlette.sse import EventSourceResponse
 EventSourceResponse.DEFAULT_PING_INTERVAL = 1000
 
 # set LLM path
-MODEL_PATH = os.environ.get('MODEL_PATH', 'THUDM/chatglm3-6b')
+MODEL_PATH = os.environ.get('MODEL_PATH', '/home/lc/projects/pretrained_models/chatglm3-6b')
 TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", MODEL_PATH)
 
 # set Embedding Model path
-EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', 'BAAI/bge-large-zh-v1.5')
+EMBEDDING_PATH = os.environ.get('EMBEDDING_PATH', '/home/lc/projects/pretrained_models/bge-large-zh-v1.5')
 
 
 @asynccontextmanager
