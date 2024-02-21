@@ -35,6 +35,8 @@ from transformers import (
 from transformers import DataCollatorForSeq2Seq as _DataCollatorForSeq2Seq
 
 from transformers import Seq2SeqTrainer as _Seq2SeqTrainer
+import os
+
 
 ModelType = Union[PreTrainedModel, PeftModelForCausalLM]
 TokenizerType = Union[PreTrainedTokenizer, PreTrainedTokenizerFast]
@@ -370,40 +372,40 @@ def _prepare_model_for_training(model: nn.Module):
 
 def load_tokenizer_and_model(
         model_dir: str,
-        trust_remote_code: bool = False,
         peft_config: Optional[PeftConfig] = None,
 ) -> tuple[PreTrainedTokenizer, nn.Module]:
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_dir, trust_remote_code=trust_remote_code
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
     if peft_config is not None:
         if peft_config.peft_type.name == "PREFIX_TUNING":
             config = AutoConfig.from_pretrained(
                 model_dir,
-                trust_remote_code=trust_remote_code,
-                empty_init=False
+                trust_remote_code=True,
+                empty_init=False,
+                use_cache=False
             )
             config.pre_seq_len = peft_config.num_virtual_tokens
             config.use_cache = False
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
-                trust_remote_code=trust_remote_code,
+                trust_remote_code=True,
                 config=config,
                 empty_init=False
             )
         if peft_config.peft_type.name == "LORA":
             model = AutoModelForCausalLM.from_pretrained(
                 model_dir,
-                trust_remote_code=trust_remote_code,
-                empty_init=False
+                trust_remote_code=True,
+                empty_init=False,
+                use_cache=False
             )
             model = get_peft_model(model, peft_config)
             model.print_trainable_parameters()
     else:
         model = AutoModelForCausalLM.from_pretrained(
             model_dir,
-            trust_remote_code=trust_remote_code,
-            empty_init=False
+            trust_remote_code=True,
+            empty_init=False,
+            use_cache=False
         )
     print_model_size(model)
 
@@ -443,13 +445,11 @@ def main(
             ),
         ],
         config_file: Annotated[str, typer.Argument(help='')],
+        auto_resume_from_checkpoint: Annotated[str, typer.Argument(
+            help='If entered as yes, automatically use the latest save checkpoint  \n If it is a numerical example 12 15, use the corresponding save checkpoint\n If the input is no, restart training')],
 ):
     ft_config = FinetuningConfig.from_file(config_file)
-    tokenizer, model = load_tokenizer_and_model(
-        model_dir,
-        trust_remote_code=True,
-        peft_config=ft_config.peft_config,
-    )
+    tokenizer, model = load_tokenizer_and_model(model_dir, peft_config=ft_config.peft_config)
     data_manager = DataManager(data_dir, ft_config.data_config)
 
     train_dataset = data_manager.get_dataset(
@@ -504,6 +504,8 @@ def main(
         tokenizer.get_command('<|user|>'),
         tokenizer.get_command('<|observation|>'),
     ]
+    model.gradient_checkpointing_enable()
+    model.enable_input_require_grads()
     trainer = Seq2SeqTrainer(
         model=model,
         args=ft_config.training_args,
@@ -517,7 +519,48 @@ def main(
         tokenizer=tokenizer,
         compute_metrics=functools.partial(compute_metrics, tokenizer=tokenizer),
     )
-    trainer.train()
+
+
+
+    # Determine whether to continue training without breakpoints or if it is empty, then start training again directly
+    if auto_resume_from_checkpoint.upper() == "NO" or auto_resume_from_checkpoint is None:
+        trainer.train()
+    else:
+
+        # Find the last checkpoint
+        output_dir = ft_config.training_args.output_dir
+        dirlist = os.listdir(output_dir)
+        checkpointsn = 0
+        for checkpointstr in dirlist:
+            if checkpointstr.find("eckpoint") > 0 and checkpointstr.find("tmp") == -1:
+                checkpoint = int(checkpointstr.replace("checkpoint-", ""))
+                if checkpoint > checkpointsn:
+                    checkpointsn = checkpoint
+        # If yes, breakpoint continuation training
+        if auto_resume_from_checkpoint.upper() == "YES":
+            # If there are saved checkpoints, continue training
+            if checkpointsn > 0:
+                model.gradient_checkpointing_enable()
+                model.enable_input_require_grads()
+                checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
+                print("resume checkpoint from  checkpoint-" + str(checkpointsn))
+                trainer.train(resume_from_checkpoint=checkpointdir)
+            else:
+                # If not, start from scratch
+                trainer.train()
+        else:
+            # If it is a numerical value, select the corresponding checkpoint
+            if auto_resume_from_checkpoint.isdigit():
+                if int(auto_resume_from_checkpoint) > 0:
+                    checkpointsn = int(auto_resume_from_checkpoint)
+                    model.gradient_checkpointing_enable()
+                    model.enable_input_require_grads()
+                    checkpointdir = output_dir + "\\checkpoint-" + str(checkpointsn)
+                    print("resume checkpoint from  checkpoint-" + str(checkpointsn))
+                    trainer.train(resume_from_checkpoint=checkpointdir)
+            else:
+                print(auto_resume_from_checkpoint,
+                      "The specified checkpoint sn(" + auto_resume_from_checkpoint + ") has not been saved. Please search for the correct chkeckpoint in the model output directory")
 
     # test stage
     if test_dataset is not None:
